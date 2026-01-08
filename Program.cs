@@ -17,17 +17,7 @@
 				return;
 			}
 
-			Console.WriteLine($"Would you like to see the list of {autoMapperProfiles.Length} AutoMapper profile(s) we found? Y/N");
-			var viewProfilesResposne = Console.ReadLine();
-
-			if (viewProfilesResposne?.ToLower() == "y")
-			{
-				foreach (var mapperProfile in autoMapperProfiles)
-				{
-					Console.WriteLine(mapperProfile);
-				}
-			}
-
+			Console.WriteLine($"{autoMapperProfiles.Length} AutoMapper profiles were found.");
 			Console.WriteLine("Compiling AutoMapper configurations from AutoMapper profiles...");
 			var autoMapperConfigs = CompileMappingConfigurationsUtil.ExtractCreateMapTypes(autoMapperProfiles!).ToArray();
 			Console.WriteLine($"{autoMapperConfigs.Length} AutoMapper configurations were found.");
