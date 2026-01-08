@@ -8,7 +8,8 @@ namespace AutoMapperConfigValidator
 		{
 			foreach (var map in maps)
 			{
-				if (!MapHasMatchingConfig(configs, map))
+				if (!MapHasMatchingConfig(configs, map) &&
+					!MapFileIsOnIgnoreList(map))
 				{ 
 					yield return map;
 				}
@@ -20,6 +21,18 @@ namespace AutoMapperConfigValidator
 			var matchingConfig = configs.FirstOrDefault(e => e.TypeIn == map.TypeOut);
 
 			return matchingConfig != null;
+		}
+
+		private static bool MapFileIsOnIgnoreList(AutoMapperMap map)
+		{ 
+			var mapFile = map.FilePath.Split('\\').LastOrDefault();
+
+			if (mapFile == null)
+			{ 
+				return false;
+			}
+
+			return Configuration.MuteFileForMissingMappings.Any(mapFile.Contains);
 		}
 	}
 }

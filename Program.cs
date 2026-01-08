@@ -80,7 +80,6 @@
 			{
 				Console.WriteLine("Please enter the path of the root folder you would like to validate for mapping.");
 				Console.WriteLine("Use | to separate multiple root folder.");
-				Console.WriteLine("This is an intensive operation, target few projects at once.");
 				var rawInput = Console.ReadLine() ?? string.Empty;
 				rootPaths = [.. rawInput.Split('|').Distinct()];
 

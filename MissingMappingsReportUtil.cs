@@ -6,11 +6,12 @@ namespace AutoMapperConfigValidator
 	{
 		public static string WriteMissingMappingsReport(string[] autoMapperProfiles, Dictionary<string, AutoMapperMap[]> mapDictionary)
 		{
-			var reportPath = Path.Combine(AppContext.BaseDirectory, Configuration.ReportFileName);
+			var date = DateTime.Now;
+			var reportPath = Path.Combine(AppContext.BaseDirectory, $"{date.Second}_{date.Minute}_{date.Hour}_{date.Month}_{date.Year}_{Configuration.ReportFileName}");
 			using var writer = new StreamWriter(reportPath);
 
 			writer.WriteLine("AutoMapper Missing Mappings Report");
-			writer.WriteLine($"Generated: {DateTime.Now}");
+			writer.WriteLine($"Generated: {date}");
 			writer.WriteLine(new string('-', 50));
 			writer.WriteLine();
 

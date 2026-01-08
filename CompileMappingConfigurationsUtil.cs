@@ -22,10 +22,29 @@ namespace AutoMapperConfigValidator
 						continue;
 					}
 
-					var autoMapperConfig = new AutoMapperConfig
+                    var typeIn = source.Split('.').LastOrDefault()
+                                       ?.Replace(" ", string.Empty);
+
+                    var typeOut = destination.Split('.').LastOrDefault()
+                                             ?.Replace(" ", string.Empty);
+
+                    if (typeIn == "ApplicationUserDetail" ||
+						typeOut == "ApplicationUserDetail")
+                    {
+                        var foo = 2;
+                    }
+
+
+                    if (typeIn == null ||
+						typeOut == null)
 					{
-						TypeIn = source,
-						TypeOut = destination,
+						continue;
+					}
+
+                    var autoMapperConfig = new AutoMapperConfig
+					{
+						TypeIn = typeIn!,
+						TypeOut = typeOut!,
 						IsReverseMap = false,
 					};
 
@@ -35,9 +54,9 @@ namespace AutoMapperConfigValidator
 					{
 						var reverseAutoMapperConfig = new AutoMapperConfig
 						{
-							TypeIn = source,
-							TypeOut = destination,
-							IsReverseMap = false,
+							TypeIn = typeOut!,
+							TypeOut = typeIn!,
+							IsReverseMap = true,
 						};
 
 						yield return reverseAutoMapperConfig;
@@ -46,31 +65,50 @@ namespace AutoMapperConfigValidator
 			}
 		}
 
-		private static bool TryGetCreateMap(
-			InvocationExpressionSyntax invocation,
-			out string source,
-			out string destination)
-		{
-			source = destination = null!;
+        private static bool TryGetCreateMap(
+            InvocationExpressionSyntax invocation,
+            out string source,
+            out string destination)
+        {
+            source = destination = null!;
 
-			if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
-				memberAccess.Name is GenericNameSyntax genericName &&
-				Configuration.CreateMapFunctionNames.Contains(genericName.Identifier.Text, StringComparer.OrdinalIgnoreCase))
-			{
-				var args = genericName.TypeArgumentList.Arguments;
+            GenericNameSyntax? genericName = invocation.Expression switch
+            {
+                // this.CreateMap<A, B>()
+                MemberAccessExpressionSyntax memberAccess
+                    => memberAccess.Name as GenericNameSyntax,
 
-				if (args.Count >= 2)
-				{
-					source = args[0].ToString();
-					destination = args[1].ToString();
-					return true;
-				}
-			}
+                // CreateMap<A, B>()
+                GenericNameSyntax name
+                    => name,
 
-			return false;
-		}
+                _ => null
+            };
 
-		private static bool HasReverseMap(InvocationExpressionSyntax createMapInvocation)
+            if (genericName == null)
+                return false;
+
+            if (!Configuration.CreateMapFunctionNames.Contains(
+                    genericName.Identifier.Text,
+                    StringComparer.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var args = genericName.TypeArgumentList.Arguments;
+
+            if (args.Count >= 2)
+            {
+                source = args[0].ToString();
+                destination = args[1].ToString();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool HasReverseMap(InvocationExpressionSyntax createMapInvocation)
 		{
 			SyntaxNode current = createMapInvocation.Parent!;
 

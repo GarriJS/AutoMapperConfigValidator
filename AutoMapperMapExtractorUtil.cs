@@ -32,9 +32,10 @@ namespace AutoMapperConfigValidator
 			foreach (var invocation in invocations)
 			{
 				if (invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
+					memberAccess.Expression is not ThisExpressionSyntax &&
 					memberAccess.Name is GenericNameSyntax genericName &&
 					Configuration.MapFunctionNames.Contains(genericName.Identifier.Text, StringComparer.OrdinalIgnoreCase))
-				{
+				{ 
 					var typeOut = genericName.TypeArgumentList.Arguments[0].ToString();
 					var sourceVariableName = invocation.ArgumentList.Arguments.FirstOrDefault()?.Expression.ToString() ?? "unknown";
 					var lineNumber = invocation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
@@ -45,9 +46,16 @@ namespace AutoMapperConfigValidator
 						continue;
 					}
 
+					var formattedTypeOut = typeOut.Split(".").LastOrDefault();
+
+					if (formattedTypeOut == null)
+					{
+						continue;
+					}
+
 					var autoMapperMapInfo = new AutoMapperMap
 					{
-						TypeOut = typeOut,
+						TypeOut = formattedTypeOut,
 						SourceVariableName = sourceVariableName,
 						FilePath = filePath,
 						LineNumber = lineNumber
